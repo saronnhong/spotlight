@@ -1,0 +1,37 @@
+<p>Scale Factor: {{scaleFactor}}</p>
+
+<span class="fullOverlayDiv" style="display: flex; width: 1000px; margin-left: 10px;">
+    <div class="overlayDiv" [style.height.px]="plotHeight"
+        [style.width.px]="overlayImage ? plotWidth: !droppedFile ? currentZoomScaleFactor != 1 ? plotWidth : plotWidth * 2 + 150: plotWidth">
+        <div #scatter id="scatter" [class]="overlayImage ? 'overlayPlots' : 'displayPlotSideBySide'"
+            [style.opacity]="displayPlot ? plotOpacityValue : 0" [style.width.px]="plotWidth"
+            [style]="!displayAlignment ? 'z-index: 2' : 'z-index: 4'" class="plotContainer">
+        </div>
+
+        <div *ngIf="scatterPlotData.length > 0"
+            [class]="!droppedFile && currentZoomScaleFactor == 1 ? 'drop-zone' : '' " (drop)="onDropFile($event)"
+            (dragover)="onDragOver($event)"
+            [style.margin-left.px]="overlayImage ? -(plotWidth + widthAdjustment + legendWidth): 0"
+            [style.height.px]="!droppedFile ? plotHeight - 100: plotHeight" [style.width.px]="plotWidth"
+            (click)="fileInput.click()" class="imageContainer">
+            <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;">
+            <div *ngIf="!droppedFile && currentZoomScaleFactor == 1" class="drop-message">
+                <p>Drop image file here or click to upload</p>
+            </div>
+            <div *ngIf="droppedFile && displayImage && overlayImage" style="z-index: 3;">
+                <img *ngIf="isImageType(droppedFile.type)" class="overlayPlotsImage" [src]="droppedFileURL"
+                    alt="Dropped Image"
+                    [ngStyle]="{ 'height.px': (plotHeight > 200 ? plotHeight : 300), 'opacity': imageOpacityValue }">
+            </div>
+        </div>
+    </div>
+    <div class="nonOverlay" [style.height.px]="plotHeight" [style.width.px]="plotWidth">
+        <div class="imageContainer2">
+            <div *ngIf="droppedFile && displayImage && !overlayImage" style="z-index: 3;">
+                <img *ngIf="isImageType(droppedFile.type)" class="overlayPlotsImage" [src]="droppedFileURL"
+                    alt="Dropped Image"
+                    [ngStyle]="{ 'height.px': (plotHeight > 200 ? plotHeight : 300), 'opacity': imageOpacityValue }">
+            </div>
+        </div>
+    </div>
+</span>
