@@ -37,12 +37,21 @@ export class SpotlightComponent implements OnInit {
   currentZoomScaleFactor = 1;
   widthAdjustment = 0
   heightAdjustment = 0
-  legendWidth = 0;
+  legendWidth = 130;
 
   imageAdjustedWidth = 0;
   maxImageContainerWidthOverylay = this.plotWidth;
   maxImageContainerWidthSidebySide = this.plotWidth * 2;
   displayOverlayContainer = true;
+
+  pieChartColors: any = {};
+  colorIndex = 0;
+  colorsArray = [
+    "#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c",
+    "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5",
+    "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f",
+    "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5"
+  ];
 
   constructor(private http: HttpClient) { }
 
@@ -85,6 +94,12 @@ export class SpotlightComponent implements OnInit {
           let pieArr = [];
           for (const key in gene) {
 
+            if (!this.pieChartColors[key] && key != 'gene') {
+              this.pieChartColors[key] = this.colorsArray[this.colorIndex]
+              this.colorIndex++;
+              console.log("key: ", key)
+            }
+
             if (gene[key] > this.limit) {
               let temp = {
                 [key]: gene[key]
@@ -100,6 +115,7 @@ export class SpotlightComponent implements OnInit {
         }
 
         this.formatData()
+        console.log("piechart colors: ", this.pieChartColors)
 
       },
       error => {
@@ -166,7 +182,6 @@ export class SpotlightComponent implements OnInit {
 
         }
       }
-      // console.log("piedata: ", this.plotData)
 
 
     }
@@ -174,10 +189,10 @@ export class SpotlightComponent implements OnInit {
     for (let geneName in this.plotData) {
       this.scatterPlotData.push(this.plotData[geneName])
     }
-    console.log("new plot data: ", this.scatterPlotData)
+    // console.log("new plot data: ", this.scatterPlotData)
 
 
-    console.log("gene dict: ", this.geneDict)
+    // console.log("gene dict: ", this.geneDict)
     this.createScatterplotWithPieCharts();
   }
 
@@ -185,8 +200,8 @@ export class SpotlightComponent implements OnInit {
   createScatterplotWithPieCharts(): void {
     const data = this.scatterPlotData
 
-    const margin = { top: 10, right: 10, bottom: 30, left: 40 };
-    const width = this.plotWidth - margin.left - margin.right;
+    const margin = { top: 10, right: 10, bottom: 10, left: this.legendWidth };
+    const width = this.plotWidth - margin.right;
     const height = this.plotHeight - margin.top - margin.bottom;
 
 
@@ -219,15 +234,15 @@ export class SpotlightComponent implements OnInit {
     const x = d3.scaleLinear()
       .domain([this.xMin * (1 - this.scaleFactor), this.xMax * (1 + this.scaleFactor)])
       .range([0, width]);
-    svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+    // svg.append("g")
+    //   .attr("transform", "translate(0," + height + ")")
+    //   .call(d3.axisBottom(x));
 
     const y = d3.scaleLinear()
       .domain([this.yMin * (1 - this.scaleFactor), this.yMax * (1 + this.scaleFactor)])
       .range([0, height]);
-    svg.append("g")
-      .call(d3.axisLeft(y));
+    // svg.append("g")
+    //   .call(d3.axisLeft(y));
 
     // svg.selectAll('dot')
     //   .data(data)
@@ -248,7 +263,6 @@ export class SpotlightComponent implements OnInit {
         .innerRadius(0)
         .outerRadius(3) as d3.ValueFn<SVGPathElement, d3.PieArcDatum<any>, string | null>
 
-
       if (d.pieData2) {
         const pieData = pie(d.pieData2);
         const pieGroup = svg.append("g")
@@ -259,7 +273,12 @@ export class SpotlightComponent implements OnInit {
           .enter()
           .append("path")
           .attr("d", arc)
-          .attr("fill", (p: any, i: number) => d3.schemeCategory10[i])
+          // .attr("fill", (p: any, i: number) => 
+          //   d3.schemeCategory10[i]
+          // )
+          .attr("fill", (p: any) => {
+            return this.pieChartColors[p.data.label]; // Assuming each data point has a 'key' property
+          });
 
         pieGroup
           .data(pieData)
@@ -272,7 +291,75 @@ export class SpotlightComponent implements OnInit {
       }
 
     });
+
+    // Add Legend
+    const clusterColors = Object.keys(this.pieChartColors).map(key => ({
+      label: key,
+      color: this.pieChartColors[key]
+    }));
+    clusterColors.sort((a, b) => {
+      // Extracting the numerical part of the label
+      const numA = parseInt(a.label.split(' ')[1]);
+      const numB = parseInt(b.label.split(' ')[1]);
+
+      // Comparing the numerical parts
+      return numA - numB;
+    });
+    const legend = svg
+      .selectAll('.legend')
+      .data(clusterColors)
+      .enter()
+      .append('g')
+      .classed('legend', true)
+      .attr('transform', function (d, i) {
+        return `translate(${-(width + 130)}, ${i * 15 + 50})`;
+      });
+
+    legend
+      .append('circle')
+      .attr('r', 4)
+      .attr('cx', width + 10)
+      .attr('fill', d => d.color);
+
+    legend
+      .append('text')
+      .attr('x', width + 20)
+      .attr('dy', '.35em')
+      .style('fill', '#000')
+      .style('font-size', '8px')
+      .attr('class', 'legend-label')
+      .text(d => d.label);
+      // .each(function (d) {
+      //   // Split label text into multiple lines if it exceeds the maximum width
+      //   const words = d.label.split(/\s+/).reverse();
+      //   let word;
+      //   let line: any = [];
+      //   const lineHeight = 10; // Adjust as needed
+      //   const maxWidth = 100; // Maximum width for label
+      //   const y = 0;
+      //   const dy = '.35em';
+      //   const text = d3.select(this);
+
+      //   while ((word = words.pop())) {
+      //     line.push(word);
+      //     text.text(line.join(' '));
+      //     // @ts-ignore
+      //     if (text.node().getComputedTextLength() > maxWidth) {
+      //       line.pop();
+      //       text.text(line.join(' '));
+      //       line = [word];
+      //       text.append('tspan')
+      //         .attr('x', width + 20)
+      //         .attr('y', y)
+      //         .attr('dy', lineHeight + 'px')
+      //         .text(word);
+      //     }
+      //   }
+      // })
+      
+
   }
+
 
   isImageType(fileType: string): boolean {
     return fileType.startsWith('image/');

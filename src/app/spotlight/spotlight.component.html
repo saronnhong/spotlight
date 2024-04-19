@@ -1,8 +1,8 @@
 <p>Scale Factor: {{scaleFactor}}</p>
 
-<span class="fullOverlayDiv" style="display: flex; width: 1000px; margin-left: 10px;">
+<span class="fullOverlayDiv" style="display: flex; width: 1200px; margin-left: 10px;">
     <div class="overlayDiv" [style.height.px]="plotHeight"
-        [style.width.px]="overlayImage ? plotWidth: !droppedFile ? currentZoomScaleFactor != 1 ? plotWidth : plotWidth * 2 + 150: plotWidth">
+        [style.width.px]="overlayImage ? plotWidth: !droppedFile ? currentZoomScaleFactor != 1 ? plotWidth : plotWidth * 2 +legendWidth*2+ 150: plotWidth+legendWidth*2">
         <div #scatter id="scatter" [class]="overlayImage ? 'overlayPlots' : 'displayPlotSideBySide'"
             [style.opacity]="displayPlot ? plotOpacityValue : 0" [style.width.px]="plotWidth"
             [style]="!displayAlignment ? 'z-index: 2' : 'z-index: 4'" class="plotContainer">
@@ -11,7 +11,7 @@
         <div *ngIf="scatterPlotData.length > 0"
             [class]="!droppedFile && currentZoomScaleFactor == 1 ? 'drop-zone' : '' " (drop)="onDropFile($event)"
             (dragover)="onDragOver($event)"
-            [style.margin-left.px]="overlayImage ? -(plotWidth + widthAdjustment + legendWidth): 0"
+            [style.margin-left.px]="overlayImage ? -(plotWidth + widthAdjustment + legendWidth): legendWidth"
             [style.height.px]="!droppedFile ? plotHeight - 100: plotHeight" [style.width.px]="plotWidth"
             (click)="fileInput.click()" class="imageContainer">
             <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;">
