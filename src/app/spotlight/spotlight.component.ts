@@ -11,8 +11,6 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./spotlight.component.scss']
 })
 export class SpotlightComponent implements OnInit {
-
-  // fileData: any[] = []
   plotData: any = {};
   limit = 0.1
   xMin = 100000;
@@ -21,7 +19,6 @@ export class SpotlightComponent implements OnInit {
   yMax = 0;
   plotWidth = 300;
   plotHeight = 500;
-
 
   displayImage = true;
   displayPlot = true;
@@ -113,9 +110,7 @@ export class SpotlightComponent implements OnInit {
           }
 
         }
-
         this.formatData()
-        console.log("piechart colors: ", this.pieChartColors)
 
       },
       error => {
@@ -189,13 +184,8 @@ export class SpotlightComponent implements OnInit {
     for (let geneName in this.plotData) {
       this.scatterPlotData.push(this.plotData[geneName])
     }
-    // console.log("new plot data: ", this.scatterPlotData)
-
-
-    // console.log("gene dict: ", this.geneDict)
     this.createScatterplotWithPieCharts();
   }
-
 
   createScatterplotWithPieCharts(): void {
     const data = this.scatterPlotData
@@ -329,34 +319,6 @@ export class SpotlightComponent implements OnInit {
       .style('font-size', '8px')
       .attr('class', 'legend-label')
       .text(d => d.label);
-      // .each(function (d) {
-      //   // Split label text into multiple lines if it exceeds the maximum width
-      //   const words = d.label.split(/\s+/).reverse();
-      //   let word;
-      //   let line: any = [];
-      //   const lineHeight = 10; // Adjust as needed
-      //   const maxWidth = 100; // Maximum width for label
-      //   const y = 0;
-      //   const dy = '.35em';
-      //   const text = d3.select(this);
-
-      //   while ((word = words.pop())) {
-      //     line.push(word);
-      //     text.text(line.join(' '));
-      //     // @ts-ignore
-      //     if (text.node().getComputedTextLength() > maxWidth) {
-      //       line.pop();
-      //       text.text(line.join(' '));
-      //       line = [word];
-      //       text.append('tspan')
-      //         .attr('x', width + 20)
-      //         .attr('y', y)
-      //         .attr('dy', lineHeight + 'px')
-      //         .text(word);
-      //     }
-      //   }
-      // })
-      
 
   }
 
@@ -407,4 +369,9 @@ export class SpotlightComponent implements OnInit {
       this.displayFile();
     }
   }
+
+
+
+
+  
 }
